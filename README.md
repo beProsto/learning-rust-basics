@@ -2,3 +2,6 @@
 
 To run it just `cargo run`. :D
 
+Here's how it looks like:
+
+![a fun gif!](somefun.gif)
