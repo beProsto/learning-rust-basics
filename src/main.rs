@@ -11,19 +11,27 @@ use std::{thread, time};
 use std::sync::{Mutex, Arc};
 
 // Width and Height of the square in which we'll draw
-const WIDTH: i32 = 8;
-const HEIGHT: i32 = 5;
+const WIDTH: i32 = 42;
+const HEIGHT: i32 = 10;
+
+// This will contain the player's data
+struct PlayerData {
+	x: i32,
+	y: i32,
+	character: char
+}
 
 // This will contain the data that will be used in the loop
 struct GameData {
 	running: bool,
-	character: char
+	pressed: char,
+	player: PlayerData
 }
 
 // render function
 fn render(data: &mut GameData, rendercharacter: &dyn Fn(&mut GameData, i32, i32)) {
 	// first clear the screen
-	print!("{esc}[2J{esc}[1;1H", esc = 27 as char); 
+	print!("{esc}[3J{esc}[2;1H", esc = 27 as char); 
 	// then draw the screen
 	for y in 0..HEIGHT {
 		for x in 0..WIDTH {
@@ -46,31 +54,55 @@ fn main() {
 	let gamedata = Arc::new(Mutex::new(
 		GameData {
 			running: true,
-			character: '\0'
+			pressed: '\0',
+			player: PlayerData {
+				x: 5,
+				y: 2,
+				character: '#'
+			}
 		}
 	));
 
 	let gamedata_copy = Arc::clone(&gamedata);
 	
+	// Clear the screen
+	print!("{esc}[2J{esc}[1;1H", esc = 27 as char); 
+	// Game rules!
+	println!("## Press Enter/Return to exit the game! ##");
+
 	// The main loop
 	let t1 = thread::spawn(move || {
 		loop {
 			/* mutex lock scope */ {
+				// We get the reference to the game data.
 				let mut dataref = gamedata.lock().unwrap(); 
 				
+				// If we broke out of the loop on the other thread - we do so on this one.
 				if !dataref.running {
-					break
+					break;
 				}
 				
+				// we define a loop pass - it will play those functions one by one :D
 				looppass(&mut dataref,
-					&|_data: &mut GameData| {
+					&|data: &mut GameData| {
+						if data.pressed == 'd' {
+							data.player.x += 1;
+						}
+						else if data.pressed == 'a' {
+							data.player.x -= 1;
+						}
+					},
+					&|data: &mut GameData, y: i32, x: i32| {
+						if data.player.x == x && data.player.y == y {
+							print!("{}", data.player.character);
+						}
+						else {
+							print!(" ");
+						}
+					},
+					&|data: &mut GameData| {
 						
-					},
-					&|_data: &mut GameData, _y: i32, _x: i32| {
-						print!("X");
-					},
-					&|_data: &mut GameData| {
-
+						data.pressed = '\0';
 					}
 				);
 			}
@@ -81,16 +113,23 @@ fn main() {
 	// The input loop
 	let t2 = thread::spawn(move || {
 		loop {
+			// This loop is frozen up until we click anything, 
+			// that's why it's on a seperate thread from the rendering! 
 			let character = winconsole::console::getch(true).unwrap();
 			/* mutex lock scope */ {
+				// We get game data's reference
 				let mut dataref = gamedata_copy.lock().unwrap();
-				dataref.character = character;
-				println!("Getch ret: '{}' !!!", dataref.character);
-				if dataref.character == '\r' {
+				// We set the current pressed character to, well, the one that is pressed
+				dataref.pressed = character;
+				// Not necessary but I'd like to know what's pressed ^^
+				println!("Getch ret: '{}' !!!", dataref.pressed);
+				// If the currently pressed button is Enter, we break out of the loop (on both threads)
+				if dataref.pressed == '\r' {
 					dataref.running = false;
 					break;
 				}
 			}
+			thread::sleep(time::Duration::from_millis(5));
 		}
 	});
 
