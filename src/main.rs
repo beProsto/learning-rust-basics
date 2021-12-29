@@ -6,6 +6,7 @@
 
 */
 
+// So-called "Includes" or "Imports"
 use winconsole;
 use std::{thread, time};
 use std::sync::{Mutex, Arc};
@@ -16,8 +17,8 @@ const HEIGHT: i32 = 10;
 
 // This will contain the player's data
 struct PlayerData {
-	x: i32,
-	y: i32,
+	x: f32,
+	y: f32,
 	character: char
 }
 
@@ -25,7 +26,8 @@ struct PlayerData {
 struct GameData {
 	running: bool,
 	pressed: char,
-	player: PlayerData
+	player: PlayerData,
+	falling_object: PlayerData
 }
 
 // render function
@@ -56,9 +58,14 @@ fn main() {
 			running: true,
 			pressed: '\0',
 			player: PlayerData {
-				x: 5,
-				y: 2,
+				x: 5.0,
+				y: 2.0,
 				character: '#'
+			},
+			falling_object: PlayerData {
+				x: 5.0,
+				y: -4.0,
+				character: 'H'
 			}
 		}
 	));
@@ -85,17 +92,43 @@ fn main() {
 				// we define a loop pass - it will play those functions one by one :D
 				looppass(&mut dataref,
 					&|data: &mut GameData| {
+						// Player movement
 						if data.pressed == 'd' {
-							data.player.x += 1;
+							data.player.x += 1.0;
 						}
 						else if data.pressed == 'a' {
-							data.player.x -= 1;
+							data.player.x -= 1.0;
 						}
+						else if data.pressed == 's' {
+							data.player.y += 1.0;
+						}
+						else if data.pressed == 'w' {
+							data.player.y -= 1.0;
+						}
+
+						// Falling object fall
+						data.falling_object.y += 0.1;
+						// Falling object crawling back to the top
+						if data.falling_object.y as i32 >= HEIGHT {
+							data.falling_object.y = -1.0;
+							data.falling_object.x = (rand::random::<i32>() % (WIDTH-2) + 1) as f32;
+						}
+
 					},
 					&|data: &mut GameData, y: i32, x: i32| {
-						if data.player.x == x && data.player.y == y {
+						// Border around the "screen"
+						if x == 0 || x == WIDTH-1 || y == 0 || y == HEIGHT-1 {
+							print!("=");
+						}
+						// Rendering the player
+						else if data.player.x  as i32 == x && data.player.y as i32 == y {
 							print!("{}", data.player.character);
 						}
+						// Rendering the falling object
+						else if data.falling_object.x as i32 == x && data.falling_object.y as i32 == y {
+							print!("{}", data.falling_object.character);
+						}
+						// The blank space
 						else {
 							print!(" ");
 						}
@@ -106,6 +139,7 @@ fn main() {
 					}
 				);
 			}
+			// Makes this thread sleep without a locked mutex, so the other one can catch up and do it's thing (only if it needs to) :D
 			thread::sleep(time::Duration::from_millis(10));
 		}
 	});
@@ -129,11 +163,10 @@ fn main() {
 					break;
 				}
 			}
-			thread::sleep(time::Duration::from_millis(5));
+			thread::sleep(time::Duration::from_millis(10));
 		}
 	});
 
 	t1.join().unwrap();
 	t2.join().unwrap();
-
 }
