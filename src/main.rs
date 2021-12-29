@@ -16,7 +16,7 @@ const HEIGHT: i32 = 5;
 
 // This will contain the data that will be used in the loop
 struct GameData {
-    running: bool,
+	running: bool,
 	character: char
 }
 
@@ -24,34 +24,34 @@ struct GameData {
 fn render(data: &mut GameData, rendercharacter: &dyn Fn(&mut GameData, i32, i32)) {
 	// first clear the screen
 	print!("{esc}[2J{esc}[1;1H", esc = 27 as char); 
-    // then draw the screen
+	// then draw the screen
 	for y in 0..HEIGHT {
-        for x in 0..WIDTH {
+		for x in 0..WIDTH {
 			// for every "pixel" invoke a callback
-            rendercharacter(data, y, x);
-        }
-        println!("");
-    }
+			rendercharacter(data, y, x);
+		}
+		println!("");
+	}
 }
 
 // The loop - it will be done every single frame!
 fn looppass(data: &mut GameData, atloopstart: &dyn Fn(&mut GameData), rendercharacter: &dyn Fn(&mut GameData, i32, i32), atloopend: &dyn Fn(&mut GameData)) {
-    atloopstart(data);
-    render(data, rendercharacter);
-    atloopend(data);
+	atloopstart(data);
+	render(data, rendercharacter);
+	atloopend(data);
 }
 
 fn main() {
 	// We define the data
-    let gamedata = Arc::new(Mutex::new(
+	let gamedata = Arc::new(Mutex::new(
 		GameData {
 			running: true,
 			character: '\0'
-    	}
+		}
 	));
 
 	let gamedata_copy = Arc::clone(&gamedata);
-    
+	
 	// The main loop
 	let t1 = thread::spawn(move || {
 		loop {
