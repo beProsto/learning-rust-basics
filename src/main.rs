@@ -15,25 +15,12 @@ use rand::random as rand; // shortens rand::random to rand
 use std::sync::{Arc, Mutex}; // shortens std::sync::Arc and Mutex to just Arc and Mutex
 use std::{thread, time}; // shortens std::thread and time to just thread and time
 
-use game_data::{ObjectData, GameData};
+use game_data::GameData;
 use render::{render, HEIGHT, WIDTH};
 
 fn main() {
     // We define the data
-    let gamedata_arc = Arc::new(Mutex::new(GameData {
-        running: true,
-        pressed: '\0',
-        player: ObjectData {
-            x: 20.0,
-            y: 5.0,
-            character: '#',
-        },
-        falling_object: ObjectData {
-            x: 5.0,
-            y: -4.0,
-            character: 'V',
-        },
-    }));
+    let gamedata_arc = Arc::new(Mutex::new(GameData::new()));
 
     let gamedata_arc_input = Arc::clone(&gamedata_arc);
 
