@@ -15,11 +15,8 @@ use rand::random as rand; // shortens rand::random to rand
 use std::sync::{Arc, Mutex}; // shortens std::sync::Arc and Mutex to just Arc and Mutex
 use std::{thread, time}; // shortens std::thread and time to just thread and time
 
-use game_data::GameData;
-use game_data::ObjectData;
-use render::render;
-use render::HEIGHT;
-use render::WIDTH;
+use game_data::{ObjectData, GameData};
+use render::{render, HEIGHT, WIDTH};
 
 fn main() {
     // We define the data
