@@ -36,7 +36,7 @@ impl GameData {
 
 // Drop specifies what happens when the object is dropped (destructed, out of it's scope)
 impl Drop for GameData {
-	fn drop(&mut self) {
-		println!("GameData Object dropped!");
-	}
+    fn drop(&mut self) {
+        println!("GameData Object dropped!");
+    }
 }
