@@ -6,58 +6,21 @@
 
 */
 
+// c++'s "include"
+mod game_data;
+mod render;
+
 // c++'s "using"
 use rand::random as rand; // shortens rand::random to rand
 use std::sync::mpsc; // shortens std::sync::mpsc to mpsc
 use std::{thread, time}; // shortens std::thread and time to just thread and time // shortens std::mem to mem
 
-// Width and Height of the square in which we'll draw
-const WIDTH: i32 = 42;
-const HEIGHT: i32 = 10;
-
-// This will contain the player's data
-struct ObjectData {
-    x: f32,
-    y: f32,
-    character: char,
-}
-
-// This will contain the data that will be used in the loop
-struct GameData {
-    pressed: char,
-    player: ObjectData,
-    falling_object: ObjectData,
-}
-
-// render function
-fn render(data: &mut GameData, rendercharacter: &dyn Fn(&mut GameData, i32, i32)) {
-    // first clear the screen
-    print!("{esc}[3J{esc}[2;1H", esc = 27 as char);
-    // then draw the screen
-    for y in 0..HEIGHT {
-        for x in 0..WIDTH {
-            // for every "pixel" invoke a callback
-            rendercharacter(data, y, x);
-        }
-        println!("");
-    }
-}
+use game_data::GameData;
+use render::{render, HEIGHT, WIDTH};
 
 fn main() {
     // We define the data
-    let mut gamedata = GameData {
-        pressed: '\0',
-        player: ObjectData {
-            x: 20.0,
-            y: 5.0,
-            character: '#',
-        },
-        falling_object: ObjectData {
-            x: 5.0,
-            y: -4.0,
-            character: 'V',
-        },
-    };
+    let mut gamedata = GameData::new();
 
     let (input_tx, input_rx) = mpsc::channel();
 
