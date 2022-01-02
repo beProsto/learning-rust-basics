@@ -100,8 +100,8 @@ fn main() {
             },
         );
 
-		// Not necessary but I'd like to know what's pressed ^^
-		println!("Getch ret: '{}' !!!", gamedata.pressed);
+        // Not necessary but I'd like to know what's pressed ^^
+        println!("Getch ret: '{}' !!!", gamedata.pressed);
 
         // We reset the character pressed, in order not to preserve it when it's not clicked
         gamedata.pressed = '\0';
