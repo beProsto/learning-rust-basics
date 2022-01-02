@@ -6,43 +6,20 @@
 
 */
 
+// c++'s "include"
+mod game_data;
+mod render;
+
 // c++'s "using"
 use rand::random as rand; // shortens rand::random to rand
 use std::sync::{Arc, Mutex}; // shortens std::sync::Arc and Mutex to just Arc and Mutex
 use std::{thread, time}; // shortens std::thread and time to just thread and time
 
-// Width and Height of the square in which we'll draw
-const WIDTH: i32 = 42;
-const HEIGHT: i32 = 10;
-
-// This will contain the player's data
-struct ObjectData {
-    x: f32,
-    y: f32,
-    character: char,
-}
-
-// This will contain the data that will be used in the loop
-struct GameData {
-    running: bool,
-    pressed: char,
-    player: ObjectData,
-    falling_object: ObjectData,
-}
-
-// render function
-fn render(data: &mut GameData, rendercharacter: &dyn Fn(&mut GameData, i32, i32)) {
-    // first clear the screen
-    print!("{esc}[3J{esc}[2;1H", esc = 27 as char);
-    // then draw the screen
-    for y in 0..HEIGHT {
-        for x in 0..WIDTH {
-            // for every "pixel" invoke a callback
-            rendercharacter(data, y, x);
-        }
-        println!("");
-    }
-}
+use game_data::GameData;
+use game_data::ObjectData;
+use render::render;
+use render::HEIGHT;
+use render::WIDTH;
 
 fn main() {
     // We define the data
